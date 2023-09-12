@@ -146,6 +146,8 @@ def play : Object → Object → Result
 | rock, paper => loses
 | rock, rock => ties
 
+#reduce play scissors rock
+
 end RPS
 
 /-!
@@ -180,6 +182,14 @@ Here's a definition that will work for us.
 inductive Box (α : Type) : Type
 | put (a : α)
 
+/- Kinda like constructors i guess -/
+
+def box_containing_zero : Box Nat := Box.put 0
+#reduce box_containing_zero
+
+def box_containing_hello : Box String := Box.put "Hello"
+
+#check Box.put
 /-!
 Let's explain it.
 - *inductive* is a keyword as explained above
