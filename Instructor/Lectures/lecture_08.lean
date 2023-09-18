@@ -1,33 +1,32 @@
 /-!
-# The Unit and Empty Types
+Note: This lecture started with an in depth review
+of the answer key for Homework #3. That took upwards
+of 40 minutes, then we only had enough time to cover
+the Unit type.  
+
+# Data Types: The Unit Type
 
 In this lecture we explore the simplest of all
 data types. Whereas the *Bool* type has two values,
 the *Unit* type has only one--defined by the single 
 constant constructor, *unit*. The Empty type has no 
 values, and no constructors, at all. It is said to
-be an *uninhabited* type. The *Unit* type is likely
-familiar to you as the *void* return type in Java.
-The *Empty* type doesn't play very much of a role 
-in programming, but it plays a vital role in the
-logic you'll learn about going forward. So let's
-dig in.
+be an *uninhabited* type. This chapter presents the
+Unit type and its related constructors and patterns
+of usage.  
 
-## Unit Type
+To best understand the Unit type, start with the
+familiar type, Bool. It has a set of two possible 
+values, namely *true* and *false*. A variable of 
+this type carries one of these two values, and thus 
+carries one *bit* of information, just enough to 
+distinguish between two possible worlds.
 
-The type, Bool, defines a set of two possible 
-values, namely *true* and *false*. The Bool type
-definition represents them as the two constant
-(argument-free) constructors, *true* and *false*. 
-A variable of this type carries one of these two
-values, and thus carries one *bit* of information,
-capable of distinguishing between two possibiities.
-
-So what about a type with just one value? We can 
-certainly define such a type. We'll call it the 
-*Unit* type. We'll present an only slightly simplified 
+So what about a type with just one value? Indeed
+we can define such a type, and it's usually called
+the *Unit* type. We'll present a slightly simplified 
 version of Lean's *Unit* type here. This will be all 
-you'll need to use the built-in type.
+you'll need to use the built-in Unit type for now.
 
 The type definition is just what you'd expect. *Unit*
 is a type with one constant (parameterless) constructor,
@@ -177,7 +176,7 @@ of this type (a type with no values at all).
 
 namespace cs2120
 
-inductive Empty : Type
+inductive Empty
 
 /-!
 That it: no constructors, no values. Voila, the Empty type. 
