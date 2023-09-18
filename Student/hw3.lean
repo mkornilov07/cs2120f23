@@ -104,7 +104,40 @@ Include test cases using #reduce to show that the reward
 from each weekday is *money* and the reward from a weekend
 day is *health*.
 -/
-implied 
+inductive Day : Type
+| monday
+| tuesday
+| wednesday
+| thursday
+| friday
+| saturday
+| sunday
+
+inductive kind : Type
+| work
+| play
+
+inductive reward : Type
+| money
+| health
+
+def kind2reward : kind → reward
+| kind.work => reward.money
+| kind.play => reward.health
+
+open Day
+open kind
+def day2kind : Day → kind
+| monday => work
+| tuesday => work
+| wednesday => work
+| thursday => work
+| friday => work
+| saturday => play
+| sunday => play
+
+def day2reward := funkom kind2reward day2kind
+#reduce day2reward saturday
 /-!
 ## Problem #6
 
@@ -120,7 +153,7 @@ Consider the outputs of the following #check commands.
 Is × left associative or right associative? Briefly explain
 how you reached your answer.
 
-Answer here: 
+Answer here: Right associative, because the first 2 types have the same meaning
 
 ### B.
 Define a function, *triple*, of the following type:
@@ -128,6 +161,8 @@ Define a function, *triple*, of the following type:
 -/
 
 -- Here:
+def triple : { α β γ : Type } → α → β → γ → (α × β × γ) 
+| _, _, _, a, b, c => (a,b,c)
 
 /-!
 ### C.
@@ -138,6 +173,14 @@ second, or third elements.
 -/
 
 -- Here:
+def first: (A × B × C) → A
+| (a, b, c) => a
+
+def second: (A × B × C) → B
+| (a, b, c) => b
+
+def third: (A × B × C) → C
+| (a, b, c) => c 
 
 /-!
 ### D.
@@ -148,6 +191,9 @@ element of that triple.
 -/
 
 -- Here:
+#eval first ("i", 5, true)
+#eval second ("i", 5, true)
+#eval third ("i", 5, true)
 
 /-!
 ### E.
@@ -156,6 +202,6 @@ up, of type (Nat × String) × Bool. The challenge here
 is to write a term of that type. 
 -/
 
-
+#check ((5, "Does Professor Sullivan actually read these?"), true)
 
 

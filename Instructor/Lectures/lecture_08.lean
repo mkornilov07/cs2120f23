@@ -177,7 +177,7 @@ of this type (a type with no values at all).
 
 namespace cs2120
 
-inductive Empty
+inductive Empty : Type
 
 /-!
 That it: no constructors, no values. Voila, the Empty type. 
