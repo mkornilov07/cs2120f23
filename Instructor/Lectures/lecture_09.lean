@@ -85,6 +85,9 @@ def empty_to_empty'' : Empty → Empty
 
 def empty_to_empty' (e : Empty) := e -- return type inferred
 
+def empty_to_empty (e : Empty) : Empty := nomatch e
+
+
 /-!
 This definition is subtle. Clearly it *is* possible to 
 define a function that promises to return a value of
@@ -194,10 +197,18 @@ you will be able to implement such a function?
 /-!
 ## Exercises
 
-- Define a function, nxe2s : Nat × Empty → String 
+- Can you define some function, nxe2s : Nat × Empty → String 
+- Is the type, Nat × Empty → String, inhabited or not?
 - How many strings can nxe2s possibly return? Why?
-- Define a function, noe2s : Nat ⊕ Empty → String 
-- How many strings can noe2s possibly return? Why?
+- Can you define a function, noe2s : String ⊕ Empty → Nat 
+- Is the type, String ⊕ Empty → Nat, inhabited or not?
+- Can noe2s return any Nat? If so, prove it by example.
+- Is the function type, (Nat → Empty), inhabited or not?
+- Prove your answer (is (Nat → Empty) uninhabited)
+- Is the type, {α : Type} → α → Empty, inhabited or not.
+- Prove your answer (Is {α : Type} → α → Empty, inhabited?)
+- Is the type, Empty → (Nat → Empty) inhabited? Prove it.
+- Prove this type uninhabited: {α : Type} → α × (α → Empty)
 -/
 
 end cs2120
