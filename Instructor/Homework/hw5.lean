@@ -76,8 +76,8 @@ doing so makes the logical meaning clearer.
 def not_either_not_both { jam cheese } :
   ((no jam) ⊕ (no cheese)) → 
   (no (jam × cheese)) 
-| Sum.inl nojam => (fun _ => _)
-| Sum.inr _ => _
+| Sum.inl nojam => (fun (a, b) => nojam a)
+| Sum.inr nocheese => (fun (a,b) => nocheese b)
 
 /-!
 ### #2: Not One or Not the Other Implies Not Both
@@ -91,8 +91,8 @@ names, *jam* and *cheese*.
 -/
 
 def demorgan1  {α β : Type} : ((α → Empty) ⊕ (β → Empty)) → (α × β → Empty)  
-| (Sum.inl noa) => _
-| (Sum.inr nob) => _
+| (Sum.inl noa) => (fun (a,b) => noa a)
+| (Sum.inr nob) => (fun(a,b) => nob b)
 
 /-!
 ### #3: Not Either Implies Not One And Not The Other
@@ -106,7 +106,7 @@ given *any* types, α and β,
 -/
 
 def demorgan2 {α β : Type} : (α ⊕ β → Empty) → ((α → Empty) × (β → Empty))
-| noaorb => _
+| noaorb => (fun (a) => noaorb (Sum.inl a), fun (b) => noaorb (Sum.inr b))
 
 
 /-!
@@ -119,7 +119,9 @@ Hint: You might want to use an explicit match expression
 in writing your solution.
 -/
 def demorgan3 {α β : Type} : ((α → Empty) × (β → Empty)) → ((α ⊕ β) → Empty)  
-| _ => _
+| (a, b) => fun (x) => match x with
+| Sum.inl d => a d
+| Sum.inr e => b e
 
 /-!
 ## PART 2
@@ -148,7 +150,9 @@ matching.
 -/
 
 -- Here
-
+def pred: Nat → Nat
+| 0 => 0
+| Nat.succ x => x
 
 
 -- Test cases
@@ -165,8 +169,14 @@ returns the same doll as *d3*.
 -/
 
 -- Answer here
+inductive Doll : Type
+| solid
+| shell (d : Doll)
+open Doll
 
-
+def mk_doll : Nat → Doll
+|0 => solid
+| Nat.succ n => shell (mk_doll n)
 
 -- test cases
 #check mk_doll 3
@@ -185,7 +195,7 @@ def nat_eq : Nat → Nat → Bool
 | 0, 0 => true
 | 0, n' + 1 => false
 | n' + 1, 0 => false
-| (n' + 1), (m' + 1) => _
+| (n' + 1), (m' + 1) => nat_eq n' m'
 
 -- a few tests
 #eval nat_eq 0 0
@@ -209,7 +219,10 @@ result *in each case*.
 -/
 
 -- Here
-
+def nat_le : Nat → Nat → Bool
+|n+1, 0 => false
+| 0, n => true
+| a+1, b+1 => nat_le a b
 /-!
 ###  #5. Nat Number Addition 
 
@@ -219,7 +232,7 @@ a natural number addition function.
 
 def add : Nat → Nat → Nat
 | m, 0 => m
-| m, (Nat.succ n') => _   -- hint: recursion
+| m, (Nat.succ n') => Nat.succ (add m n')   -- hint: recursion
 
 
 -- Some test cases
@@ -244,7 +257,7 @@ test cases to show that it appears to be working.
 
 def mul : Nat → Nat → Nat
 | m, 0 => 0
-| m, (Nat.succ n') => add (_) (_)
+| m, (Nat.succ n') => add (mul m n') (m)
 
 /-!
 ### Sum Binary Nat Function Over Range 0 to n 
@@ -262,7 +275,13 @@ to and including n.
 -/
 
 def sum_f : (Nat → Nat) → Nat → Nat 
-| f, 0 => _
-| f, n' + 1 => _
+| f, 0 => f 0
+| f, n' + 1 => Nat.add (sum_f f n') (f (n'+1))
+
+def sq : Nat → Nat
+|n => mul n n
+
+
+#eval sum_f sq 5
 
 

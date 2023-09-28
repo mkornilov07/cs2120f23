@@ -391,7 +391,7 @@ that * applies before +, for example.
 -/
 
 notation "{"v"}" => var_exp v
-prefix:max "¬" => un_exp unary_op.not 
+prefix:max "¬" => un_exp unary_op.not /-Priority-/
 infixr:35 " ∧ " => bin_exp binary_op.and  
 infixr:30 " ∨ " => bin_exp binary_op.or 
 infixr:25 " ⇒ " =>  bin_exp binary_op.imp
