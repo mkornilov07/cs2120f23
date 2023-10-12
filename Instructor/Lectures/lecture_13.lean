@@ -160,6 +160,7 @@ inductive binary_op : Type
 | and
 | or
 | imp
+| iff
 inductive Expr : Type
 | var_exp (v : var)
 | un_exp (op : unary_op) (e : Expr)
@@ -175,10 +176,15 @@ def eval_un_op : unary_op → (Bool → Bool)
 def implies : Bool → Bool → Bool
 | true, false => false
 | _, _ => true
+def iff : Bool → Bool → Bool
+|true,true => true
+|false, false => true
+| _,_ => false
 def eval_bin_op : binary_op → (Bool → Bool → Bool)
 | binary_op.and => and
 | binary_op.or => or
 | binary_op.imp => implies
+| binary_op.iff => iff
 def Interp := var → Bool  
 def eval_expr : Expr → Interp → Bool 
 | (Expr.var_exp v),        i => i v
@@ -553,11 +559,27 @@ program computes *2^v* from *v* and then passes *2^v* (the number
 of interpretations/rows to generate, along with *v*, the number 
 of variables, to a recursive function that does most of the work.
 -/
-def mk_interps (vars : Nat) : List Interp := 
+def map : List A → (A → B) → List B
+  | [], _ => []
+  | h::t, f => (f h)::(map t f)
+
+def make_bool_lists: Nat → List (List Bool)
+| 0 => [[]]
+| n + 1 =>  (map (make_bool_lists n) (fun L => true ::L)) ++ (map (make_bool_lists n) (fun L => false::L))
+
+#eval make_bool_lists 2
+
+def mk_interps : Nat → List Interp
+| n => map (make_bool_lists n) bools_to_interp
+
+
+
+/-def mk_interps (vars : Nat) : List Interp := 
   mk_interps_helper (2^vars) vars
 where mk_interps_helper : (rows : Nat) → (vars : Nat) → List Interp
   | 0, _         => []
   | (n' + 1), v  => (mk_interp_vars_row v n')::mk_interps_helper n' v
+-/
 
 /-
 Generate list of 8 interpretations for three variables
@@ -679,7 +701,17 @@ cases to demonstrate your results.
 -/
 
 -- Here
+def is_valid : Expr → Bool
+|e => reduce_and (truth_table_outputs e)
+where reduce_and : List Bool → Bool
+| [] => true
+| h::t => and h (reduce_and t)
 
+def is_sat : Expr → Bool
+| e => not (is_valid (¬e))
+
+def is_unsat : Expr → Bool
+| e => not (is_sat e)
 
 -- A few tests
 #eval is_valid (X)                      -- expect false
@@ -689,9 +721,14 @@ cases to demonstrate your results.
 #eval is_valid (X ∨ ¬X)                 -- expect true
 #eval is_valid ((¬(X ∧ Y) ⇒ (¬X ∨ ¬Y))) -- expect true
 #eval is_valid (¬(X ∨ Y) ⇒ (¬X ∧ ¬Y))   -- expect true
-#eval is_valid ((X ∨ Y) ⇒ (X → ¬Y))     -- expect false
+#eval is_valid ((X ∨ Y) ⇒ (X ⇒ ¬Y))     -- expect false
 
 -- Test cases
 
+def A := {(var.mk 0)}
+def O := {(var.mk 1)}
+def C := {(var.mk 2)}
+def B := {(var.mk 3)}
+def proposition := (O ∨ A) ∧ (B ∨ C) ⇔ (A ∧ B) ∨ (A ∧ C) ∨ (O ∧ B) ∨ (O ∧ C) 
 
-
+#eval is_valid proposition
