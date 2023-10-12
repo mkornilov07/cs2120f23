@@ -51,7 +51,7 @@ natural number, *n'*.
 
 def apply_n {α : Type} : (α → α) → α → Nat → α  
 | f, a, 0 => a
-| f, a, (n' + 1) => f (apply_n f a n') 
+| f, a, (n' + 1) => f (apply_n f a n')
 
 -- Test cases: confirm that expectations are correct
 
@@ -186,7 +186,7 @@ should return [false, true].
 
 def map_not : List Bool → List Bool 
 | [] => []
-| h::t => (not h) :: (map_not t)   -- hint: use :: to construct answer
+| h::t => not h :: map_not t   -- hint: use :: to construct answer
 
 -- test cases
 #eval map_not []              -- exect []
@@ -203,7 +203,7 @@ of all the natural numbers from *n* to *0*, inclusive.
 -- Your answer here
 def countdown : Nat → List Nat
 | 0 => [0]
-| Nat.succ n => (n+1) :: (countdown n)
+| n' + 1 => (n' + 1)::countdown n'
 
 
 -- test cases
@@ -219,15 +219,14 @@ denoted *++*. Write your own list append function. Call
 it *concat*. For any type *α*, it takes two arguments of 
 type *List α* and returns a result of type *List α,* the
 result of appending the second list to the first. Hint:
-do case analysis on the first argument, and think about
-this function as an analog of natural number addition.
+do case analysis on the first argument.
 -/
 
 -- Here
 
-def concat {α : Type} : List α → List α → List α
+def concat {α : Type} : List α → List α → List α 
 | [], m => m
-| h::t, m =>  h::(concat t m)
+| h::t, m => h::concat t m
 
 -- Test cases
 
@@ -244,8 +243,9 @@ just that one element.
 -/
 
 -- Here
-def pure' : α → List α
-| a => [a]
+def pure' : String → List String 
+| s => [s]
+
 #eval pure' "Hi"       -- expect ["Hi"]
 
 /-!
@@ -258,13 +258,12 @@ list on the right. Instead, consider using *concat*.
 -/
 
 -- Answer here:
-def list_rev : List A → List A
+
+def rev {α : Type}: List α → List α
 | [] => []
-| h::t => concat (list_rev t) [h]
+| h::t => t++[h]
 
---#eval list_rev [4,6,8,2]
+
 /-!
-## Part 2: Propositional Logic: Syntax and Semantics
-
-Forthcoming as an update to this file.
+## End of Exam Practice Part 1
 -/

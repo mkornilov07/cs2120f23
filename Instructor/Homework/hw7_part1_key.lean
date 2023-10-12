@@ -179,7 +179,6 @@ def eval_bin_op : binary_op → (Bool → Bool → Bool)
 | binary_op.and => and
 | binary_op.or => or
 | binary_op.imp => implies
-| binary_op.iff => iff
 def Interp := var → Bool  
 def eval_expr : Expr → Interp → Bool 
 | (Expr.var_exp v),        i => i v
@@ -526,7 +525,7 @@ def interp3' := bools_to_interp [false, true, true]
 
 
 /-!
-## From Number of Variables and Row Index to Interpretation
+## From Number of Variables to List of Interpretations
 
 Building in steps, we next define a function that takes a
 number of variables and a row index and that returns the
@@ -547,8 +546,6 @@ def interp3'' :=  mk_interp_vars_row 3 3 -- vars=3, row=3
 
 
 /-!
-## From Number of Variables to List of Interpretations
-
 Finally, now, given nothing but a number of variables, we can
 iteratively generate a list of all 2^v interpretations. We use
 the same style of function definition above, where the top-level
@@ -556,45 +553,11 @@ program computes *2^v* from *v* and then passes *2^v* (the number
 of interpretations/rows to generate, along with *v*, the number 
 of variables, to a recursive function that does most of the work.
 -/
-def map : List A → (A → B) → List B
-  | [], _ => []
-  | h::t, f => (f h)::(map t f)
-
-def make_bool_lists: Nat → List (List Bool)
-| 0 => [[]]
-| n + 1 =>  (map (make_bool_lists n) (fun L => true ::L)) ++ (map (make_bool_lists n) (fun L => false::L))
-
-#eval make_bool_lists 2
-
-def mk_interps : Nat → List Interp
-| n => map (make_bool_lists n) bools_to_interp
-
-
-
-/-def mk_interps (vars : Nat) : List Interp := 
+def mk_interps (vars : Nat) : List Interp := 
   mk_interps_helper (2^vars) vars
 where mk_interps_helper : (rows : Nat) → (vars : Nat) → List Interp
   | 0, _         => []
   | (n' + 1), v  => (mk_interp_vars_row v n')::mk_interps_helper n' v
--/
-
-
-/-!
-## (e : Expression) → Nat, The Number of Variables In e
--/
-
--- Analyze and understand how this function works!
-def max_variable_index : Expr → Nat
-| Expr.var_exp (var.mk i) => i
-| Expr.un_exp _ e => max_variable_index e
-| Expr.bin_exp _ e1 e2 => max (max_variable_index e1) (max_variable_index e2)
-
-#eval max_variable_index {v₀}
-#eval max_variable_index ({v₀} ∧ {v₂})
-
--- Given expression, return number of variables it assumes
-def num_vars : Expr → Nat := λ e => max_variable_index e + 1
-
 
 /-
 Generate list of 8 interpretations for three variables
@@ -604,7 +567,7 @@ def interps3 := mk_interps 3
 #reduce interps3.length   -- expect 8
 
 /-!
-## From List Interp and Expr to List of Bool Outputs
+## From List Interp and Expr to List Output Bool Values
 Now how about a function that takes a list of interpretations and
 an expresssion and that produces a list of output values? 
 -/
@@ -615,24 +578,25 @@ def eval_expr_interps : List Interp → Expr → List Bool
 | h::t, e => eval_expr_interps t e ++ [eval_expr e h]
 
 /-!
-The change in the preceding algorithm made after class puts the 
-list of output values in order with respect to our *enumeration* 
-of interpretations.
+The change in the preceding algorithm puts the list of output
+values in the right order with respect to our *enumeration* of
+interpretations.
 -/
 
--- Test/Demonstration cases
+-- Demonstration ]
 #reduce eval_expr_interps (mk_interps 2) ({v₀} ∧ {v₁})  -- [F,F,F,T]
 #reduce eval_expr_interps (mk_interps 2) ({v₀} ∨ {v₁})  -- [F,T,T,T]
 
 /-!
-## From Expr to max Variable Index
+
+## From Expr to Number of Variables (Highest Variable Index)
 
 But our interface isn't yet ideal. We're providing an expression as 
 an argument, and from it we should be able to figure out how many 
 variables are involved. In other words, we shouldn't have to provide 
 a list of interpretations as a separate (and here the first) argument.
 The observation that leads to a solution is that we can analyze any
-expression to determine the max index of any variable appearing
+expression to determine the highest index of any variable appearing
 in it. If we add 1 to that index, we'll have the number of variables
 in the expression and thus the number of columns in the truth table.
 We can then use mk_interps with that number as an argument to create
@@ -640,8 +604,16 @@ the list of interpretations, corresponding to truth table rows, that
 ne need to pass to eval_expr_interps to get the list of outputs values.
 -/
 
+def highest_variable_index : Expr → Nat
+| Expr.var_exp (var.mk i) => i
+| Expr.un_exp _ e => highest_variable_index e
+| Expr.bin_exp _ e1 e2 => max (highest_variable_index e1) (highest_variable_index e2)
+
+#eval highest_variable_index {v₀}
+#eval highest_variable_index ({v₀} ∧ {v₂})
+
 /-!
-## Expr → List Bool: One Value For Each Interpretation
+## Major Result: Expr → List Bool, One For Each Interpretation
 
 Here's a really important function. Given an expression in propositional
 logic (using our syntax) it returns the list of outputs values under each
@@ -650,12 +622,12 @@ in the given expression.
 -/
 
 def truth_table_outputs : Expr → List Bool
-| e =>  eval_expr_interps (mk_interps (num_vars e)) e
+| e =>  eval_expr_interps (mk_interps (highest_variable_index e + 1)) e
 
 /-!
 Demonstration/Tests: Confirm that actual results are as expected by
 writing out the truth tables on paper. Note that in the second case,
-with the max variable index being 2 (Z is var.mk 2), we have *3* 
+with the highest variable index being 2 (Z is var.mk 2), we have *3* 
 variables/columns, thus 8 rows, and thus a list of 8 output values. 
 -/
 
@@ -670,7 +642,7 @@ def Z := {v₂}
 
 /-!
 Now we can produce lists of outputs under all interpretations of variables
-from index 0 to the max index of any variable appearing in the given
+from index 0 to the highest index of any variable appearing in the given
 expression. Confirm that the results are expected by writing out the
 truth tables on paper, computing the expected outputs, and checking them
 against what we compute here.
@@ -706,28 +678,25 @@ short comments to explain what each of your functions does. Write a few test
 cases to demonstrate your results.
 -/
 
--- Here
-def is_valid : Expr → Bool
-|e => reduce_and (truth_table_outputs e)
-where reduce_and : List Bool → Bool
+def reduce_and : List Bool → Bool
 | [] => true
 | h::t => and h (reduce_and t)
 
-def is_sat : Expr → Bool
-| e => not (is_valid (¬e))
+def reduce_or : List Bool → Bool
+| [] => false
+| h::t => or h (reduce_or t)
 
-def is_unsat : Expr → Bool
-| e => not (is_sat e)
+def is_valid : Expr → Bool := reduce_and ∘ truth_table_outputs
+def is_sat : Expr → Bool := reduce_or ∘ truth_table_outputs
+def is_unsat : Expr → Bool := not ∘ reduce_or ∘ truth_table_outputs
 
--- A few tests
+-- a few tests
 #eval is_valid (X)                      -- expect false
 #eval is_sat (X)                        -- exect true
 #eval is_sat (X ∧ ¬X)                   -- expect false
 #eval is_unsat (X ∧ ¬X)                 -- expect true
 #eval is_valid (X ∨ ¬X)                 -- expect true
 #eval is_valid ((¬(X ∧ Y) ⇒ (¬X ∨ ¬Y))) -- expect true
-#eval is_valid (¬(X ∨ Y) ⇒ (¬X ∧ ¬Y))   -- expect true
-#eval is_valid ((X ∨ Y) ⇒ (X ⇒ ¬Y))     -- expect false
 
 -- Test cases
 
